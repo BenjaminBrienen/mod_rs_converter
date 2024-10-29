@@ -22,15 +22,11 @@ fn convert_mod_rs_structure(base_dir: &Path) -> std::io::Result<()> {
 
 /// Given the path to `mod.rs`, determine the new path based on the containing directory
 fn get_new_module_path(mod_rs_path: &Path) -> Option<PathBuf> {
-	mod_rs_path
-		.parent()
-		.and_then(|parent| {
-			parent.file_name().map(|name| {
-				let parent_dir = parent.parent()?;
-				Some(parent_dir.join(format!("{}.rs", name.to_string_lossy())))
-			})
-		})
-		.flatten()
+	let grandparent = mod_rs_path.parent()?.parent()?;
+	let file_name = mod_rs_path.parent()?.file_name()?;
+	let mut new_path = grandparent.join(file_name);
+	new_path.set_extension("rs");
+	Some(new_path)
 }
 
 /// Move `mod.rs` to the new path and rename it
